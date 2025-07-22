@@ -1,1 +1,4 @@
-#Also Caleed DataBASE
+#Also Called DataBASE
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
