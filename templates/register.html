@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %} Vehicle Parking App - Register Page {% endblock %}
+
+{% block content %}
+<div class="page-wrapper d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+  <div class="register-container">
+    <h1 class="text-center mb-4">Vechicle Parking System</h1>
+    <h2 class="text-center mb-4">(Registration)</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form action="/register" method="post">
+      <div class="form-group">
+        <label>USERNAME</label>
+        <input type="text" class="form-control" name="username" 
+               placeholder="Choose your USERNAME" required minlength="3" maxlength="20">
+      </div>
+
+      <div class="form-group">
+        <label>PASSWORD</label>
+        <input type="password" class="form-control" name="password" 
+               placeholder="Create your PASSWORD" required minlength="3" maxlength="20">
+      </div>
+
+      <div class="form-group">
+        <label>FULL NAME</label>
+        <input type="text" class="form-control" name="fullname" 
+               placeholder="Enter your FULL_NAME" required minlength="3" maxlength="20">
+      </div>
+
+        <div class="form-group">
+            <label>ADDRESS</label>
+    <input type="text" class="form-control" name="address" 
+           placeholder="Enter your ADDRESS" required minlength="3" maxlength="100" title="Please enter a valid address">
+</div>
+
+<div class="form-group">
+    <label>PINCODE</label>
+    <input type="text" class="form-control" name="pincode" 
+           placeholder="Enter your PINCODE" required pattern="\d{6}" title="Pincode must be exactly 6 digits">
+</div>
+
+
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-success mt-3">Register</button>
+      </div>
+
+      <div class="text-center mt-3">
+        <p>Already have an account? <a href="/login">Login Here</a></p>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

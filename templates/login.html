@@ -1,20 +1,16 @@
 {% extends 'base.html' %}
-{% block title %} Vehicle Parking App - Login Page {% endblock %}
+{% block title %}Login | Vehicle Parking Portal{% endblock %}
 
 {% block content %}
-
-
-
-
-<div class="page-wrapper d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+<div class="d-flex align-items-center justify-content-center" style="min-height: 100vh;">
   <div class="login-container">
-    <h1 class="text-center mb-4">Vechicle Parking System</h1>
+    <h2 class="text-center mb-4">Login to Parking Portal</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        {% for category, message in messages %}
+        {% for category, msg in messages %}
           <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
+            {{ msg }}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -23,42 +19,25 @@
       {% endif %}
     {% endwith %}
 
-    <form action="/login" method="post">
+    <form method="POST" action="{{ url_for('login') }}">
       <div class="form-group">
-        <label>USERNAME</label>
-        <input type="text" class="form-control" name="username" placeholder="Enter your USERNAME here" required minlength="3" maxlength="20">
+        <label for="username">Username or Email</label>
+        <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username or email" required minlength="3" maxlength="20">
       </div>
 
       <div class="form-group">
-        <label>PASSWORD</label>
-        <input type="password" class="form-control" name="password" placeholder="Enter your PASSWORD here" required minlength="3" maxlength="20">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required minlength="3" maxlength="20">
       </div>
 
       <div class="text-center">
-        <button type="submit" class="btn btn-primary mt-3">Login</button>
+        <button type="submit" class="btn btn-success mt-3">Sign In</button>
       </div>
 
       <div class="text-center mt-3">
-        <p>New User? <a href="/register">Register Here</a></p>
+        <small>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></small>
       </div>
     </form>
   </div>
 </div>
-
-<div class="container mt-3">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-</div>
-
-
 {% endblock %}

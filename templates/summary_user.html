@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Parking Summary | Vehicle Parking App{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('user_dashboard') }}">User Panel</a>
+    <div class="collapse navbar-collapse justify-content-end">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('user_dashboard') }}">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('user_summary') }}">Your Summary</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('edit_profile') }}">Update Profile</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+
+  <!-- Section Header -->
+  <div class="text-center py-3 mb-4 shadow rounded" style="background-color: #d1f7ff;">
+    <h3 class="mb-0 font-weight-bold">Parking Usage Overview</h3>
+  </div>
+
+  <!-- Occupancy List -->
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white text-center font-weight-bold">
+          Spot Availability by Lot
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for item in occupancy_data %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="font-weight-bold">{{ item.lot }}</span>
+            <span>
+              <span class="badge badge-success px-3 py-2">Available: {{ item.available }}</span>
+              <span class="badge badge-danger px-3 py-2 ml-2">Occupied: {{ item.occupied }}</span>
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

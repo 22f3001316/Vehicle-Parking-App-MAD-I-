@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Panel | Vehicle Parking App{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">Admin Control</a>
+    <div class="collapse navbar-collapse justify-content-end">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_manage_users') }}">Users</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_summary') }}">Summary</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+  <div class="text-center mb-4">
+    <h3 class="font-weight-bold">Manage Parking Lots</h3>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="row">
+    {% if lots %}
+      {% for lot in lots %}
+        <div class="col-md-4 mb-4 d-flex">
+          <div class="card shadow-sm w-100" style="border-radius: 12px;">
+            <div class="card-body">
+              <h5 class="card-title text-center font-weight-bold">{{ lot.prime_location_name }}</h5>
+              <p class="card-text text-center text-muted">Occupied: {{ lot.occupied_count }} / {{ lot.max_spots }}</p>
+              
+              <div class="d-flex justify-content-center mb-3">
+                <a href="{{ url_for('admin_add_lot') }}" class="btn btn-outline-primary btn-sm mx-1">Edit</a>
+                <form action="{{ url_for('admin_delete_lot', lot_id=lot.id) }}" method="post" style="display:inline;">
+                  <button class="btn btn-outline-danger btn-sm mx-1" onclick="return confirm('Are you sure?')">Delete</button>
+                </form>
+              </div>
+
+              <div class="text-center">
+                {% for spot in lot.spots %}
+                  {% if spot.status == 'A' %}
+                    <span class="badge badge-success mx-1">A</span>
+                  {% else %}
+                    <span class="badge badge-danger mx-1">O</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12 text-center">
+        <p>No parking lots have been added yet.</p>
+      </div>
+    {% endif %}
+
+    <div class="col-md-4 d-flex align-items-center justify-content-center">
+      <a href="{{ url_for('admin_add_lot') }}" class="btn btn-outline-success btn-lg">+ Add New Lot</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
