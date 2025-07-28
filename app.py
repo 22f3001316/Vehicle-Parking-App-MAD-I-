@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from backend.models import db, User, Admin
+from backend.models import db, User, Admin, ParkingLot, ParkingSpot, Reservation
+
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 import os
 
 # --------------------- Flask App Setup --------------------- #
@@ -123,6 +127,116 @@ def admin_dashboard():
         flash("Unauthorized access.", "danger")
         return redirect(url_for('login'))
     return render_template('admin_dashboard.html', username=session.get('username'))
+
+
+# ---------------------- Admin Functional Routes (Fixed) ----------------------
+
+@app.route('/admin/manage-lots')
+def admin_manage_lots():
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    lots = ParkingLot.query.all()
+    for lot in lots:
+        lot.occupied_count = ParkingSpot.query.filter_by(lot_id=lot.id, status='O').count()
+    return render_template('admin_lots.html', lots=lots)
+
+
+@app.route('/admin/add-lot', methods=['GET', 'POST'])
+def admin_add_lot():
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        price = float(request.form['price'])
+        address = request.form['address']
+        pincode = request.form['pincode']
+        max_spots = int(request.form['max_spots'])
+
+        # Your model uses: prime_location_name, price, address, pincode, max_spots
+        lot = ParkingLot(
+            prime_location_name=name,
+            price=price,
+            address=address,
+            pincode=pincode,
+            max_spots=max_spots
+        )
+        db.session.add(lot)
+        db.session.flush()  # To get lot.id before commit
+
+        # Create empty parking spots
+        for i in range(1, max_spots + 1):
+            spot = ParkingSpot(lot_id=lot.id, status='A')
+            db.session.add(spot)
+
+        db.session.commit()
+        flash("New parking lot created with spots.", "success")
+        return redirect(url_for('admin_manage_lots'))
+
+    return render_template('admin_add_lot.html')
+
+
+@app.route('/admin/delete-lot/<int:lot_id>', methods=['POST'])
+def admin_delete_lot(lot_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    lot = ParkingLot.query.get_or_404(lot_id)
+    db.session.delete(lot)  # cascade will remove spots due to model
+    db.session.commit()
+    flash("Lot and all its spots deleted.", "warning")
+    return redirect(url_for('admin_manage_lots'))
+
+
+@app.route('/admin/manage-users')
+def admin_manage_users():
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    users = User.query.all()
+    return render_template('admin_users.html', users=users)
+
+
+@app.route('/admin/delete-user/<int:user_id>', methods=['POST'])
+def admin_delete_user(user_id):
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    user = User.query.get_or_404(user_id)
+    for res in user.reservations:
+        spot = ParkingSpot.query.get(res.spot_id)
+        if spot:
+            spot.status = 'A'
+        db.session.delete(res)
+    db.session.delete(user)
+    db.session.commit()
+    flash("User and their reservations deleted.", "info")
+    return redirect(url_for('admin_manage_users'))
+
+
+@app.route('/admin/summary')
+def admin_summary():
+    if session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    lots = ParkingLot.query.all()
+    total_spots = ParkingSpot.query.count()
+    occupied = ParkingSpot.query.filter_by(status='O').count()
+    available = ParkingSpot.query.filter_by(status='A').count()
+    revenue_data = []
+
+    for lot in lots:
+        occupied_count = ParkingSpot.query.filter_by(lot_id=lot.id, status='O').count()
+        revenue = round(lot.price * occupied_count, 2)
+        revenue_data.append((lot.prime_location_name, revenue))
+
+    return render_template('admin_summary.html',
+                           revenue_data=revenue_data,
+                           total_spots=total_spots,
+                           occupied=occupied,
+                           available=available)
+
 
 
 # --------------------- Run --------------------- #
