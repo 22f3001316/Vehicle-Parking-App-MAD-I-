@@ -73,3 +73,5 @@ class Reservation(db.Model):
     payment_time = db.Column(db.DateTime)
     
     force_released = db.Column(db.Boolean, default=False)
+    status = db.Column(db.String(1), default='O')  # 'O' = Occupied, 'A' = Released
+
