@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Parking Lots | Vehicle Parking App{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand font-weight-bold" href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
+    <div class="collapse navbar-collapse justify-content-end">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('view_all_users') }}">Users</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('search') }}">Search</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_summary') }}">Summary</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('edit_admin_profile') }}">Edit Profile</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+  <div class="text-center bg-light shadow-sm py-3 rounded mb-4" style="background-color: #e0f9f1;">
+    <h3 class="font-weight-bold mb-0">Find Parking Lots</h3>
+  </div>
+
+  <!-- Search Form -->
+  <form method="GET" action="{{ url_for('search') }}" class="form-inline justify-content-center mb-4">
+    <label class="mr-2 font-weight-bold">Search by</label>
+    <select name="filter_by" class="form-control mr-2">
+      <option value="user_id">User ID</option>
+      <option value="location">Location</option>
+    </select>
+    <input type="text" name="query" class="form-control mr-2" placeholder="Enter value..." required>
+    <button type="submit" class="btn btn-outline-primary">Search</button>
+  </form>
+
+  <!-- Results -->
+  {% if lots %}
+    <div class="text-center mb-3">
+      <h5 class="font-weight-bold">Matching Lots</h5>
+    </div>
+    <div class="row">
+      {% for lot in lots %}
+      <div class="col-md-4 mb-4">
+        <div class="card border-0 shadow rounded">
+          <div class="card-body">
+            <h5 class="card-title text-center font-weight-bold">Lot #{{ lot.id }}</h5>
+            <p class="text-center">Status: {{ lot.occupied_spots }} / {{ lot.maximum_number_of_spots }} occupied</p>
+            <div class="text-center my-2">
+              <a href="{{ url_for('editlot', lot_id=lot.id) }}" class="btn btn-sm btn-primary mx-1">Edit</a>
+              <a href="{{ url_for('delete_parking_lot', lot_id=lot.id) }}" class="btn btn-sm btn-danger mx-1">Delete</a>
+            </div>
+            <div class="text-center mt-2">
+              {% for spot in lot.spots %}
+                {% if spot.status == 'A' %}
+                  <span class="badge badge-success mx-1">A</span>
+                {% else %}
+                  <span class="badge badge-danger mx-1">O</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% elif lots is not none %}
+    <div class="text-center mt-3">
+      <p class="text-danger font-weight-bold">No parking lots matched your search.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
