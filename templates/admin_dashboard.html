@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Parking App - Admin Dashboard{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container justify-content-center">
+    <a class="navbar-brand font-weight-bold text-white" href="/admin">Welcome to Admin Dashboard</a>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav text-center">
+        <li class="nav-item"><a class="nav-link" href="/admin">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/admin_users/">Users</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin_parkinglots">Lots</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/summary">Summary</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/admin_editprofile">Edit Profile</a></li>
+        <li class="nav-item"><a class="nav-link" href="/login">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5 pt-4">
+  <div class="text-center font-weight-bold py-3 shadow mt-5" style="background-color: aquamarine;">
+    <h3 class="mb-0">Admin Dashboard</h3>
+  </div>
+
+  <div class="row justify-content-center mt-4">
+    <div class="col-md-3 mb-3">
+      <a href="/admin/admin_users/" class="btn btn-primary btn-block py-3 shadow-sm">Manage Users</a>
+    </div>
+    <div class="col-md-3 mb-3">
+      <a href="/admin_parkinglots" class="btn btn-success btn-block py-3 shadow-sm">Manage Parking Lots</a>
+    </div>
+    <div class="col-md-3 mb-3">
+      <a href="/admin/summary" class="btn btn-warning btn-block py-3 shadow-sm">View Summary</a>
+    </div>
+    <div class="col-md-3 mb-3">
+      <a href="/admin/admin_editprofile" class="btn btn-info btn-block py-3 shadow-sm">Edit Profile</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

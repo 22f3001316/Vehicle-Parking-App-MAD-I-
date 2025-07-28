@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Parking App - Occupied Spot Details{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container justify-content-center">
+    <a class="navbar-brand font-weight-bold text-white" href="/admin">Welcome to Admin</a>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav text-center">
+        <li class="nav-item"><a class="nav-link" href="/admin">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/admin_users/">Users</a></li>
+        <li class="nav-item"><a class="nav-link" href="/search">Search</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/summary">Summary</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/admin_editprofile">Edit Profile</a></li>
+        <li class="nav-item"><a class="nav-link" href="/login">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+  <div class="text-center mb-4">
+    <h3 class="py-2 px-3 bg-warning font-weight-bold rounded">Occupied Parking Spot Details</h3>
+  </div>
+
+  <div class="card shadow-sm mx-auto" style="max-width: 500px;">
+    <div class="card-body">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><strong>Spot ID:</strong> {{ spot.id }}</li>
+        <li class="list-group-item"><strong>User ID:</strong> {{ reservation.user_id if reservation else 'N/A' }}</li>
+        <li class="list-group-item"><strong>Vehicle Number:</strong> {{ reservation.vehicle_no if reservation else 'N/A' }}</li>
+        <li class="list-group-item"><strong>Parking Time:</strong> {{ reservation.parking_timestamp if reservation else 'N/A' }}</li>
+        <li class="list-group-item"><strong>Estimated Cost:</strong> ₹{{ reservation.parking_cost if reservation else 'N/A' }}</li>
+      </ul>
+
+      <div class="text-center mt-4">
+        <a href="{{ url_for('lot_details', lot_id=spot.lot_id) }}" class="btn btn-primary">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
