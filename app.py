@@ -154,7 +154,7 @@ def admin_add_lot():
         pincode = request.form['pincode']
         max_spots = int(request.form['max_spots'])
 
-        # Your model uses: prime_location_name, price, address, pincode, max_spots
+        
         lot = ParkingLot(
             prime_location_name=name,
             price=price,
