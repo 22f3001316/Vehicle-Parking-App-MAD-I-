@@ -1,139 +1,124 @@
 {% extends "base.html" %}
-
-{% block title %}User Summary{% endblock %}
+{% block title %}My Parking Summary{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="fas fa-chart-line"></i> Parking Summary</h2>
+<h2 class="mb-4"><i class="fas fa-chart-line"></i> My Parking Summary</h2>
 
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary text-center">
+            <div class="card-body">
+                <h3>₹{{ total_spent }}</h3>
+                <p>Total Spent So Far</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success text-center">
+            <div class="card-body">
+                <h3>{{ reservations|length }}</h3>
+                <p>Total Visits</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if spending_chart_data %}
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-6 mb-4">
         <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-chart-pie"></i> Parking Lot Occupancy</h5>
-            </div>
+            <div class="card-header"><i class="fas fa-chart-pie"></i> Spend by Location</div>
             <div class="card-body">
-                <canvas id="occupancyChart"></canvas>
+                <canvas id="spendChart"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+
+    <div class="col-md-6 mb-4">
         <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-chart-bar"></i> Revenue by Location</h5>
-            </div>
+            <div class="card-header"><i class="fas fa-chart-bar"></i> Visits by Location</div>
             <div class="card-body">
-                <canvas id="revenueChart"></canvas>
+                <canvas id="visitChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-list"></i> Occupancy Details</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Location</th>
-                                <th>Available</th>
-                                <th>Occupied</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in occupancy %}
-                            <tr>
-                                <td>{{ item.name }}</td>
-                                <td><span class="badge bg-success">{{ item.available }}</span></td>
-                                <td><span class="badge bg-warning">{{ item.occupied }}</span></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-money-bill-wave"></i> Revenue Details</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Location</th>
-                                <th>Current Revenue</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in revenues %}
-                            <tr>
-                                <td>{{ item.name }}</td>
-                                <td>₹{{ item.revenue }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- detailed history -->
+<div class="card">
+  <div class="card-header"><i class="fas fa-history"></i> Parking History</div>
+  <div class="card-body table-responsive">
+    <table class="table table-sm">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Spot</th>
+          <th>Location</th>
+          <th>Vehicle</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Paid (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reservations %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ r.spot_id }}</td>
+          <td>{{ r.spot.lot.prime_location_name }}</td>
+          <td>{{ r.vehicle_number }}</td>
+          <td>{{ r.parking_timestamp.strftime('%d-%b %I:%M%p') }}</td>
+          <td>
+            {% if r.leaving_timestamp %}
+              {{ r.leaving_timestamp.strftime('%d-%b %I:%M%p') }}
+            {% else %}
+              <span class="badge bg-warning">Active</span>
+            {% endif %}
+          </td>
+          <td>{{ r.parking_cost or 0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+{% else %}
+<p class="alert alert-info">You haven’t completed any paid reservations yet.</p>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
+{% if spending_chart_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Occupancy Chart
-const occupancyCtx = document.getElementById('occupancyChart').getContext('2d');
-new Chart(occupancyCtx, {
-    type: 'doughnut',
+/* ------- Spend by Location --------*/
+const spendCtx = document.getElementById('spendChart').getContext('2d');
+new Chart(spendCtx, {
+    type: 'pie',
     data: {
-        labels: [{% for item in occupancy %}'{{ item.name }}'{% if not loop.last %},{% endif %}{% endfor %}],
+        labels: {{ spending_chart_data|map(attribute='name')|list|tojson }},
         datasets: [{
-            label: 'Occupied',
-            data: [{% for item in occupancy %}{{ item.occupied }}{% if not loop.last %},{% endif %}{% endfor %}],
-            backgroundColor: [
-                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
-            ]
+            data:  {{ spending_chart_data|map(attribute='amount')|list|tojson }},
+            backgroundColor: ['#007bff','#28a745','#ffc107','#17a2b8','#dc3545','#6f42c1']
         }]
     },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
-    }
+    options: {responsive: true, plugins:{legend:{position:'bottom'}}}
 });
 
-// Revenue Chart
-const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-new Chart(revenueCtx, {
+/* ------- Visits by Location --------*/
+const visitCtx = document.getElementById('visitChart').getContext('2d');
+new Chart(visitCtx, {
     type: 'bar',
     data: {
-        labels: [{% for item in revenues %}'{{ item.name }}'{% if not loop.last %},{% endif %}{% endfor %}],
-        datasets: [{
-            label: 'Revenue (₹)',
-            data: [{% for item in revenues %}{{ item.revenue }}{% if not loop.last %},{% endif %}{% endfor %}],
+        labels: {{ visit_chart_data|map(attribute='name')|list|tojson }},
+        datasets:[{
+            data: {{ visit_chart_data|map(attribute='count')|list|tojson }},
             backgroundColor: '#28a745'
         }]
     },
-    options: {
-        responsive: true,
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
+    options:{responsive:true, scales:{y:{beginAtZero:true}}}
 });
 </script>
+{% endif %}
 {% endblock %}
+

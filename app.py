@@ -122,13 +122,30 @@ def create_app() -> Flask:
         return redirect(url_for('login'))
 
     # -----------------------  ADMIN DASHBOARD  --------------------
+    # -----------------------  ADMIN DASHBOARD  --------------------
     @app.route('/admin/dashboard')
     def admin_dashboard():
+        # Allow only admins
         if session.get('role') != 'admin':
             flash('Unauthorized access.', 'danger')
             return redirect(url_for('login'))
-        return render_template('admin_dashboard.html',
-                               username=session.get('username'))
+
+        # ---------- Quick-stat queries ----------
+        total_lots      = ParkingLot.query.count()
+        total_spots     = ParkingSpot.query.count()
+        occupied_spots  = ParkingSpot.query.filter_by(status='O').count()
+        available_spots = total_spots - occupied_spots
+        # ----------------------------------------
+
+        return render_template(
+            'admin_dashboard.html',
+            username=session.get('username'),
+            total_lots=total_lots,
+            total_spots=total_spots,
+            occupied_spots=occupied_spots,
+            available_spots=available_spots
+        )
+
 
     # -------------------  ADMIN LOT MANAGEMENT  -------------------
     @app.route('/admin/manage-lots')
@@ -489,29 +506,50 @@ def create_app() -> Flask:
 
         return render_template('edit_profile.html', user=user)
 
+          # ---------------- USER SUMMARY (personal view) ---------------
     @app.route('/user/summary')
     def user_summary():
         if session.get('role') != 'user':
             flash('Access denied!', 'danger')
             return redirect(url_for('login'))
 
-        lots = ParkingLot.query.all()
-        occupancy = []
-        revenues  = []
-        for lot in lots:
-            occ   = ParkingSpot.query.filter_by(
-                lot_id=lot.id, status='O').count()
-            avail = ParkingSpot.query.filter_by(
-                lot_id=lot.id, status='A').count()
-            rev   = occ * lot.price
-            occupancy.append({'name': lot.prime_location_name,
-                              'available': avail,
-                              'occupied': occ})
-            revenues.append({'name': lot.prime_location_name,
-                             'revenue': rev})
-        return render_template('user_summary.html',
-                               occupancy=occupancy,
-                               revenues=revenues)
+        current_user = User.query.filter_by(username=session['username']).first()
+
+        # every reservation ever made by this user
+        reservations = (
+            Reservation.query
+            .filter_by(user_id=current_user.id)
+            .order_by(Reservation.parking_timestamp.desc())
+            .all()
+        )
+
+        # ---- aggregate personal spending by lot  ----
+        spending_by_lot = {}        # {lot_name: ₹total_spent}
+        visits_by_lot   = {}        # {lot_name: number_of_times}
+        total_spent     = 0.0
+
+        for r in reservations:
+            lot_name = r.spot.lot.prime_location_name     # via relationships
+            cost     = r.parking_cost or 0
+            total_spent += cost
+
+            spending_by_lot[lot_name] = spending_by_lot.get(lot_name, 0) + cost
+            visits_by_lot[lot_name]   = visits_by_lot.get(lot_name, 0) + 1
+
+        # convert to lists so Jinja / JS can iterate easily
+        spending_chart_data = [{'name': k, 'amount': v}
+                               for k, v in spending_by_lot.items()]
+        visit_chart_data    = [{'name': k, 'count': v}
+                               for k, v in visits_by_lot.items()]
+
+        return render_template(
+            'user_summary.html',
+            reservations=reservations,
+            total_spent=round(total_spent, 2),
+            spending_chart_data=spending_chart_data,
+            visit_chart_data=visit_chart_data
+        )
+
 
     # --------------------------------------------------------------
     return app
