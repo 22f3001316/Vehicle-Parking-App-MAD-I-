@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Release Parking Spot{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header text-center bg-warning text-dark">
+                <h4><i class="fas fa-sign-out-alt"></i> Release Parking Spot</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Confirm Release</strong>
+                </div>
+                
+                <div class="mb-3">
+                    <h5>Spot Details:</h5>
+                    <p><strong>Spot ID:</strong> #{{ spot.id }}</p>
+                    <p><strong>Location:</strong> {{ lot.prime_location_name }}</p>
+                    <p><strong>Rate:</strong> ₹{{ lot.price }}/hour</p>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h5>Estimated Cost: ₹{{ cost }}</h5>
+                    <small>This amount will be calculated based on your parking duration.</small>
+                </div>
+                
+                <form method="POST">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-check"></i> Release & Pay
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Summary - Admin{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-chart-bar"></i> Dashboard Summary</h2>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body text-center">
+                <h3>{{ total_spots }}</h3>
+                <p>Total Spots</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body text-center">
+                <h3>{{ available }}</h3>
+                <p>Available</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body text-center">
+                <h3>{{ occupied }}</h3>
+                <p>Occupied</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body text-center">
+                <h3>{{ "%.1f"|format((occupied/total_spots*100) if total_spots > 0 else 0) }}%</h3>
+                <p>Utilization</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Spot Status</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> Revenue by Location</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Revenue Table -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-money-bill-wave"></i> Revenue Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th>Current Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for name, revenue in revenue_data %}
+                            <tr>
+                                <td>{{ name }}</td>
+                                <td>₹{{ revenue }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Status Chart
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'pie',
+    data: {
+        labels: ['Available', 'Occupied'],
+        datasets: [{
+            data: [{{ available }}, {{ occupied }}],
+            backgroundColor: ['#28a745', '#ffc107']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Revenue Chart
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+new Chart(revenueCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for name, revenue in revenue_data %}'{{ name }}'{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Revenue (₹)',
+            data: [{% for name, revenue in revenue_data %}{{ revenue }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: '#007bff'
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+

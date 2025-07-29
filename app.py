@@ -270,8 +270,7 @@ def create_app() -> Flask:
             return redirect(url_for('login'))
 
         user = User.query.filter_by(username=session['username']).first()
-        spot = ParkingSpot.query.filter_by(
-            lot_id=lot_id, status='A').first()
+        spot = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').first()
 
         if not spot:
             flash('No vacant spots in this location.', 'info')
@@ -279,12 +278,19 @@ def create_app() -> Flask:
 
         if request.method == 'POST':
             vehicle_number = request.form['vehicle_number']
+            expected_end_time = request.form.get('expected_end_time')
+
+            expected_end = None
+            if expected_end_time:
+                expected_end = datetime.fromisoformat(expected_end_time)
+
             db.session.add(
                 Reservation(
                     user_id=user.id,
                     spot_id=spot.id,
                     vehicle_number=vehicle_number,
                     parking_timestamp=datetime.utcnow(),
+                    expected_end_time=expected_end,
                     parking_cost=0.0,
                     payment_status='Pending',
                     status='O'
@@ -295,9 +301,8 @@ def create_app() -> Flask:
             flash('Spot booked successfully.', 'success')
             return redirect(url_for('user_dashboard'))
 
-        return render_template('book_spot.html',
-                               lot_id=lot_id,
-                               spot_id=spot.id)
+        return render_template('book_spot.html', lot_id=lot_id, spot_id=spot.id)
+
 
     @app.route('/user/release/<int:spot_id>', methods=['GET', 'POST'])
     def user_release_spot(spot_id):
@@ -315,6 +320,8 @@ def create_app() -> Flask:
         lot = ParkingLot.query.get(spot.lot_id)
 
         if request.method == 'POST' and spot.status == 'O':
+            payment_mode = request.form.get('payment_mode')
+
             spot.status = 'A'
             reservation.leaving_timestamp = datetime.utcnow()
             hours = (
@@ -322,12 +329,14 @@ def create_app() -> Flask:
             ).total_seconds() / 3600
             cost = round(hours * lot.price, 2)
 
-            reservation.parking_cost  = cost
+            reservation.parking_cost = cost
             reservation.payment_status = 'Paid'
-            reservation.status        = 'A'
+            reservation.payment_mode = payment_mode
+            reservation.payment_time = datetime.utcnow()
+            reservation.status = 'A'
             db.session.commit()
 
-            flash(f'Spot released. Payment: ₹{cost}', 'success')
+            flash(f'Spot released. Payment of ₹{cost} via {payment_mode} completed.', 'success')
             return redirect(url_for('user_dashboard'))
 
         est_time = datetime.utcnow()
@@ -335,8 +344,7 @@ def create_app() -> Flask:
             ((est_time - reservation.parking_timestamp).total_seconds() / 3600)
             * lot.price, 2
         )
-        return render_template('release_confirm.html',
-                               spot=spot, cost=est_cost, lot=lot)
+        return render_template('release_confirm.html', spot=spot, cost=est_cost, lot=lot)
 
     @app.route('/user/search', methods=['GET', 'POST'])
     def user_search():

@@ -1,45 +1,52 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Vehicle Parking App - Edit Profile{% endblock %}
-
-{% block navbar %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container">
-    <a class="navbar-brand" href="#">User Dashboard</a>
-    <div class="collapse navbar-collapse justify-content-end">
-      <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link" href="/user">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="/user/summary_user">Summary</a></li>
-        <li class="nav-item"><a class="nav-link" href="/editprofile">Edit Profile</a></li>
-        <li class="nav-item"><a class="nav-link" href="/login">Logout</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
-{% endblock %}
+{% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-<div class="container mt-5 pt-4">
-  <div class="row justify-content-center">
+<div class="row justify-content-center">
     <div class="col-md-6">
-      <div class="container-fluid text-center font-weight-bold py-3 shadow mt-5" style="background-color: aquamarine;">
-        <h3 class="mb-0">Update Your Profile</h3>
-      </div>
-
-      <form method="POST">
-        <div class="form-group">
-          <label for="username"><strong>Username</strong></label>
-          <input type="text" id="username" name="username" class="form-control" value="{{ user.username }}" required>
+        <div class="card shadow">
+            <div class="card-header text-center bg-primary text-white">
+                <h4><i class="fas fa-user-edit"></i> Edit Profile</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{{ user.name }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               value="{{ user.email }}" disabled>
+                        <div class="form-text">Email cannot be changed</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control" id="address" name="address" rows="3" required>{{ user.address }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="pincode" class="form-label">Pincode</label>
+                        <input type="text" class="form-control" id="pincode" name="pincode" 
+                               value="{{ user.pincode }}" pattern="[0-9]{6}" required>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="form-group">
-          <label for="password"><strong>Password</strong></label>
-          <input type="password" id="password" name="password" class="form-control" value="{{ user.password }}" required>
-        </div>
-        <div class="text-center mt-4">
-          <button type="submit" class="btn btn-success">Save Changes</button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 {% endblock %}
+

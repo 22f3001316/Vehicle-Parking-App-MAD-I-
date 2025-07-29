@@ -1,44 +1,119 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Vehicle Parking App - Admin Dashboard{% endblock %}
-
-{% block navbar %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container justify-content-center">
-    <a class="navbar-brand font-weight-bold text-white" href="/admin">Welcome to Admin Dashboard</a>
-    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-      <ul class="navbar-nav text-center">
-        <li class="nav-item"><a class="nav-link" href="/admin">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/admin_users/">Users</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin_parkinglots">Lots</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/summary">Summary</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/admin_editprofile">Edit Profile</a></li>
-        <li class="nav-item"><a class="nav-link" href="/login">Logout</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
-{% endblock %}
+{% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5 pt-4">
-  <div class="text-center font-weight-bold py-3 shadow mt-5" style="background-color: aquamarine;">
-    <h3 class="mb-0">Admin Dashboard</h3>
-  </div>
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+    </div>
+</div>
 
-  <div class="row justify-content-center mt-4">
-    <div class="col-md-3 mb-3">
-      <a href="/admin/admin_users/" class="btn btn-primary btn-block py-3 shadow-sm">Manage Users</a>
+<div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Manage Lots</h5>
+                        <p class="card-text">Create, edit, delete parking lots</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-building fa-2x"></i>
+                    </div>
+                </div>
+                <a href="{{ url_for('admin_manage_lots') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-right"></i> Go
+                </a>
+            </div>
+        </div>
     </div>
-    <div class="col-md-3 mb-3">
-      <a href="/admin_parkinglots" class="btn btn-success btn-block py-3 shadow-sm">Manage Parking Lots</a>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Manage Users</h5>
+                        <p class="card-text">View and manage registered users</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+                <a href="{{ url_for('admin_manage_users') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-right"></i> Go
+                </a>
+            </div>
+        </div>
     </div>
-    <div class="col-md-3 mb-3">
-      <a href="/admin/summary" class="btn btn-warning btn-block py-3 shadow-sm">View Summary</a>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Summary</h5>
+                        <p class="card-text">View charts and analytics</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-bar fa-2x"></i>
+                    </div>
+                </div>
+                <a href="{{ url_for('admin_summary') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-right"></i> Go
+                </a>
+            </div>
+        </div>
     </div>
-    <div class="col-md-3 mb-3">
-      <a href="/admin/admin_editprofile" class="btn btn-info btn-block py-3 shadow-sm">Edit Profile</a>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Add New Lot</h5>
+                        <p class="card-text">Create new parking location</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-plus fa-2x"></i>
+                    </div>
+                </div>
+                <a href="{{ url_for('admin_add_lot') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-right"></i> Go
+                </a>
+            </div>
+        </div>
     </div>
-  </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h4 class="text-primary">{{ total_lots or 0 }}</h4>
+                        <p>Total Parking Lots</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-success">{{ total_spots or 0 }}</h4>
+                        <p>Total Parking Spots</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-warning">{{ occupied_spots or 0 }}</h4>
+                        <p>Occupied Spots</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-info">{{ available_spots or 0 }}</h4>
+                        <p>Available Spots</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
