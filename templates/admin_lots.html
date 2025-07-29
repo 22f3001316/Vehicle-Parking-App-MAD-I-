@@ -35,14 +35,17 @@
                     </div>
                 </div>
             </div>
-            <div class="card-footer d-flex justify-content-between">
-                <a href="{{ url_for('admin_edit_lot', lot_id=lot.id) }}" class="btn btn-info btn-sm">
+            <div class="card-footer d-flex flex-wrap justify-content-between">
+                <a href="{{ url_for('admin_view_spots', lot_id=lot.id) }}" class="btn btn-secondary btn-sm me-1 mb-1">
+                    <i class="fas fa-eye"></i> View Spots
+                </a>
+                <a href="{{ url_for('admin_edit_lot', lot_id=lot.id) }}" class="btn btn-info btn-sm me-1 mb-1">
                     <i class="fas fa-edit"></i> Edit
                 </a>
                 <form method="POST"
                       action="{{ url_for('admin_delete_lot', lot_id=lot.id) }}"
                       onsubmit="return confirm('Delete this lot? All EMPTY spots will be removed. Lots with occupied spots cannot be deleted.');"
-                      class="d-inline">
+                      class="d-inline mb-1">
                     <button type="submit" class="btn btn-danger btn-sm">
                         <i class="fas fa-trash"></i> Delete
                     </button>
@@ -67,5 +70,3 @@
 </div>
 {% endif %}
 {% endblock %}
-
-

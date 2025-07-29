@@ -298,6 +298,46 @@ def create_app() -> Flask:
             return redirect(url_for('admin_manage_lots'))
 
         return render_template('admin_edit_lot.html', lot=lot)
+    
+        # ---------- ADMIN • View all spots in a lot ----------
+    @app.route('/admin/lot/<int:lot_id>/spots')
+    def admin_view_spots(lot_id):
+        if session.get('role') != 'admin':
+            flash('Unauthorized access.', 'danger')
+            return redirect(url_for('login'))
+
+        lot = ParkingLot.query.get_or_404(lot_id)
+        spots = (
+            ParkingSpot.query
+            .filter_by(lot_id=lot.id)
+            .order_by(ParkingSpot.id)
+            .all()
+        )
+
+        spot_info = []
+        for sp in spots:
+            res = None
+            if sp.status == 'O':
+                res = (
+                    Reservation.query
+                    .filter_by(spot_id=sp.id, status='O')
+                    .order_by(Reservation.parking_timestamp.desc())
+                    .first()
+                )
+            spot_info.append({'spot': sp, 'reservation': res})
+
+        # a quick header count (nice to show)
+        occupied = sum(1 for i in spot_info if i['spot'].status == 'O')
+        available = lot.max_spots - occupied
+
+        return render_template(
+            'admin_spots.html',
+            lot=lot,
+            spot_info=spot_info,
+            occupied=occupied,
+            available=available
+        )
+
 
     # ---------------------------  USER  ----------------------------
     @app.route('/user/dashboard')

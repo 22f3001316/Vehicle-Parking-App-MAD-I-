@@ -4,39 +4,66 @@
 {% block content %}
 <h2 class="mb-3">
     <i class="fas fa-car"></i> Spots – {{ lot.prime_location_name }}
-    <span class="fs-6 text-muted">({{ lot.address }})</span>
 </h2>
 
-<div class="row row-cols-1 row-cols-md-3 g-3">
-  {% for item in spot_info %}
-  {% set sp = item.spot %}
-  {% set res = item.reservation %}
-  <div class="col">
-    <div class="card shadow-hover {% if sp.status == 'O' %}border-warning{% else %}border-success{% endif %}">
-      <div class="card-body">
-        <h5 class="card-title">
-          Spot #{{ sp.id }}
-          <span class="badge bg-{{ 'warning' if sp.status == 'O' else 'success' }}">
-            {{ 'Occupied' if sp.status=='O' else 'Available' }}
-          </span>
-        </h5>
+<!-- quick counters -->
+<div class="mb-4">
+    <span class="badge bg-success me-2">Available: {{ available }}</span>
+    <span class="badge bg-warning">Occupied: {{ occupied }}</span>
+</div>
 
-        {% if sp.status == 'O' %}
-        <p class="mb-1"><strong>Vehicle:</strong> {{ res.vehicle_number }}</p>
-        <p class="mb-1"><strong>User:</strong> {{ res.user.name }} ({{ res.user.email }})</p>
-        <p class="mb-0"><strong>Parked:</strong>
-           {{ res.parking_timestamp.strftime('%d-%b-%Y %I:%M %p') }}
-        </p>
-        {% else %}
-        <p class="text-muted mb-0">No vehicle parked.</p>
-        {% endif %}
-      </div>
-    </div>
+<!-- spot table -->
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Spot&nbsp;ID</th>
+          <th>Status</th>
+          <th>Vehicle&nbsp;No.</th>
+          <th>User&nbsp;Name / Email</th>
+          <th>Parked&nbsp;Since</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in spot_info %}
+        {% set sp  = item.spot %}
+        {% set res = item.reservation %}
+        <tr class="{% if sp.status=='O' %}table-warning{% else %}table-success{% endif %}">
+          <td>{{ sp.id }}</td>
+          <td>
+            <span class="badge bg-{{ 'warning' if sp.status=='O' else 'success' }}">
+              {{ 'Occupied' if sp.status=='O' else 'Available' }}
+            </span>
+          </td>
+
+          <td>{{ res.vehicle_number if res else '—' }}</td>
+
+          <td>
+            {% if res %}
+              {{ res.user.name }}<br>
+              <small class="text-muted">{{ res.user.email }}</small>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+
+          <td>
+            {% if res %}
+              {{ res.parking_timestamp.strftime('%d-%b-%Y %I:%M %p') }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-  {% endfor %}
 </div>
 
 <a href="{{ url_for('admin_manage_lots') }}" class="btn btn-outline-primary mt-4">
-    <i class="fas fa-arrow-left"></i> Back to Lots
+  <i class="fas fa-arrow-left"></i> Back to Lots
 </a>
 {% endblock %}
+
