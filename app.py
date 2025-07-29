@@ -176,16 +176,34 @@ def create_app() -> Flask:
 
         return render_template('admin_add_lot.html')
 
+       # --------------------  ADMIN DELETE LOT  ---------------------
+# --------------------  ADMIN DELETE LOT  ---------------------
     @app.route('/admin/delete-lot/<int:lot_id>', methods=['POST'])
     def admin_delete_lot(lot_id):
         if session.get('role') != 'admin':
+            flash('Unauthorized access.', 'danger')
             return redirect(url_for('login'))
 
         lot = ParkingLot.query.get_or_404(lot_id)
-        db.session.delete(lot)      # cascades to spots
+
+        # How many spots are still occupied?
+        occupied = ParkingSpot.query.filter_by(lot_id=lot.id, status='O').count()
+
+        if occupied > 0:
+            flash(f'Cannot delete "{lot.prime_location_name}" – '
+                  f'{occupied} spot(s) still occupied.', 'warning')
+            return redirect(url_for('admin_manage_lots'))
+
+        # Safe to delete (all spots available)
+        db.session.delete(lot)  # cascades to spots
         db.session.commit()
-        flash('Lot and all its spots deleted.', 'warning')
+        flash('Lot and all its spots deleted.', 'success')
         return redirect(url_for('admin_manage_lots'))
+
+
+
+
+
 
     # -------------------  ADMIN USER MANAGEMENT  -------------------
     @app.route('/admin/manage-users')
@@ -234,6 +252,52 @@ def create_app() -> Flask:
                                total_spots=total_spots,
                                occupied=occupied,
                                available=available)
+
+    @app.route('/admin/edit-lot/<int:lot_id>', methods=['GET', 'POST'])
+    def admin_edit_lot(lot_id):
+        if session.get('role') != 'admin':
+            return redirect(url_for('login'))
+
+        lot = ParkingLot.query.get_or_404(lot_id)
+
+        if request.method == 'POST':
+            # read form fields
+            lot.prime_location_name = request.form['name']
+            lot.price               = float(request.form['price'])
+            lot.address             = request.form['address']
+            lot.pincode             = request.form['pincode']
+
+            # handle change in maximum spots
+            new_max = int(request.form['max_spots'])
+            diff    = new_max - lot.max_spots
+
+            if diff > 0:
+                # need extra spots
+                for _ in range(diff):
+                    db.session.add(ParkingSpot(lot_id=lot.id, status='A'))
+            elif diff < 0:
+                # shrinking lot
+                occ = ParkingSpot.query.filter_by(lot_id=lot.id, status='O').count()
+                if new_max < occ:
+                    flash('Cannot reduce below current occupied spots.', 'danger')
+                    return redirect(url_for('admin_edit_lot', lot_id=lot_id))
+
+                # delete extra spots (only those currently available)
+                to_delete = (
+                    ParkingSpot.query
+                    .filter_by(lot_id=lot.id, status='A')
+                    .limit(-diff)
+                    .all()
+                )
+                for spot in to_delete:
+                    db.session.delete(spot)
+
+            lot.max_spots = new_max
+            db.session.commit()
+            flash('Parking-lot details updated.', 'success')
+            return redirect(url_for('admin_manage_lots'))
+
+        return render_template('admin_edit_lot.html', lot=lot)
 
     # ---------------------------  USER  ----------------------------
     @app.route('/user/dashboard')

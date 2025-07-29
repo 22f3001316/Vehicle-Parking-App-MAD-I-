@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Edit Parking Lot{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card shadow">
+      <div class="card-header text-center bg-info text-white">
+        <h4><i class="fas fa-edit"></i> Edit Parking Lot</h4>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Location Name</label>
+            <input type="text" name="name" class="form-control"
+                   value="{{ lot.prime_location_name }}" required>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Price per Hour (₹)</label>
+              <input type="number" name="price" class="form-control"
+                     step="0.01" min="0" value="{{ lot.price }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Maximum Spots</label>
+              <input type="number" name="max_spots" class="form-control"
+                     min="1" value="{{ lot.max_spots }}" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Address</label>
+            <textarea name="address" rows="3" class="form-control" required>{{ lot.address }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Pincode</label>
+            <input type="text" name="pincode" class="form-control"
+                   pattern="[0-9]{6}" value="{{ lot.pincode }}" required>
+          </div>
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{{ url_for('admin_manage_lots') }}" class="btn btn-secondary">
+              <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-info">
+              <i class="fas fa-save"></i> Update Lot
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

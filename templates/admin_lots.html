@@ -26,7 +26,7 @@
                 <p><i class="fas fa-map-pin"></i> {{ lot.pincode }}</p>
                 <p><i class="fas fa-rupee-sign"></i> ₹{{ lot.price }}/hour</p>
                 <p><i class="fas fa-car"></i> {{ lot.occupied_count }}/{{ lot.max_spots }} occupied</p>
-                
+
                 <!-- Progress bar for occupancy -->
                 <div class="progress mb-3">
                     <div class="progress-bar" role="progressbar" 
@@ -35,9 +35,14 @@
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
-                <form method="POST" action="{{ url_for('admin_delete_lot', lot_id=lot.id) }}" 
-                      onsubmit="return confirm('Are you sure you want to delete this lot?')" class="d-inline">
+            <div class="card-footer d-flex justify-content-between">
+                <a href="{{ url_for('admin_edit_lot', lot_id=lot.id) }}" class="btn btn-info btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <form method="POST"
+                      action="{{ url_for('admin_delete_lot', lot_id=lot.id) }}"
+                      onsubmit="return confirm('Delete this lot? All EMPTY spots will be removed. Lots with occupied spots cannot be deleted.');"
+                      class="d-inline">
                     <button type="submit" class="btn btn-danger btn-sm">
                         <i class="fas fa-trash"></i> Delete
                     </button>
@@ -62,3 +67,5 @@
 </div>
 {% endif %}
 {% endblock %}
+
+

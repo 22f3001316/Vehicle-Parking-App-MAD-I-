@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Spots – {{ lot.prime_location_name }}{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">
+    <i class="fas fa-car"></i> Spots – {{ lot.prime_location_name }}
+    <span class="fs-6 text-muted">({{ lot.address }})</span>
+</h2>
+
+<div class="row row-cols-1 row-cols-md-3 g-3">
+  {% for item in spot_info %}
+  {% set sp = item.spot %}
+  {% set res = item.reservation %}
+  <div class="col">
+    <div class="card shadow-hover {% if sp.status == 'O' %}border-warning{% else %}border-success{% endif %}">
+      <div class="card-body">
+        <h5 class="card-title">
+          Spot #{{ sp.id }}
+          <span class="badge bg-{{ 'warning' if sp.status == 'O' else 'success' }}">
+            {{ 'Occupied' if sp.status=='O' else 'Available' }}
+          </span>
+        </h5>
+
+        {% if sp.status == 'O' %}
+        <p class="mb-1"><strong>Vehicle:</strong> {{ res.vehicle_number }}</p>
+        <p class="mb-1"><strong>User:</strong> {{ res.user.name }} ({{ res.user.email }})</p>
+        <p class="mb-0"><strong>Parked:</strong>
+           {{ res.parking_timestamp.strftime('%d-%b-%Y %I:%M %p') }}
+        </p>
+        {% else %}
+        <p class="text-muted mb-0">No vehicle parked.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<a href="{{ url_for('admin_manage_lots') }}" class="btn btn-outline-primary mt-4">
+    <i class="fas fa-arrow-left"></i> Back to Lots
+</a>
+{% endblock %}
