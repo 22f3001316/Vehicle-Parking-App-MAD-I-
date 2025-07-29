@@ -354,6 +354,56 @@ def create_app() -> Flask:
             occupied=occupied,
             available=available
         )
+        
+    # --------------  ADMIN • GLOBAL SEARCH  -----------------
+    @app.route('/admin/search', methods=['POST'])
+    def admin_search():
+        if session.get('role') != 'admin':
+            flash('Unauthorized access.', 'danger')
+            return redirect(url_for('login'))
+
+        q = request.form.get('query', '').strip()
+        if not q:
+            flash('Please enter something to search.', 'warning')
+            return redirect(url_for('admin_dashboard'))
+
+        # ---- USERS ------------------------------------------------
+        users = User.query.filter(
+            (User.username.ilike(f'%{q}%')) |
+            (User.email.ilike(f'%{q}%'))    |
+            (User.name.ilike(f'%{q}%'))
+        ).all()
+
+        # ---- VEHICLE / RESERVATIONS ------------------------------
+        res = (
+            Reservation.query
+            .filter(Reservation.vehicle_number.ilike(f'%{q}%'))
+            .order_by(Reservation.parking_timestamp.desc())
+            .all()
+        )
+
+        # ---- SPOTS ------------------------------------------------
+        spots = []
+        if q.isdigit():  # exact spot id
+            spots = ParkingSpot.query.filter_by(id=int(q)).all()
+        else:  # search by lot name / pincode
+            spots = (
+                ParkingSpot.query
+                .join(ParkingLot)
+                .filter(
+                    (ParkingLot.prime_location_name.ilike(f'%{q}%')) |
+                    (ParkingLot.pincode.ilike(f'%{q}%'))
+                ).all()
+            )
+
+        return render_template(
+            'admin_search_results.html',
+            query=q,
+            users=users,
+            reservations=res,
+            spots=spots
+        )
+
 
 
     # ---------------------------  USER  ----------------------------

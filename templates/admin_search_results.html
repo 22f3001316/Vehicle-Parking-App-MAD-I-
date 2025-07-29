@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Search – {{ query }}{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">
+    <i class="fas fa-search"></i> Search results for “{{ query }}”
+</h2>
+
+{% if not users and not spots and not reservations %}
+    <div class="alert alert-info">No matches found.</div>
+{% endif %}
+
+{% if users %}
+<div class="card mb-4">
+  <div class="card-header bg-success text-white">
+      <i class="fas fa-user"></i> Users ({{ users|length }})
+  </div>
+  <div class="card-body table-responsive">
+      <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+              <tr><th>ID</th><th>Name</th><th>Email</th><th>Address</th></tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+            <tr>
+              <td>{{ u.id }}</td>
+              <td>{{ u.name }}</td>
+              <td>{{ u.email }}</td>
+              <td>{{ u.address }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+      </table>
+  </div>
+</div>
+{% endif %}
+
+{% if spots %}
+<div class="card mb-4">
+  <div class="card-header bg-info text-white">
+      <i class="fas fa-parking"></i> Spots ({{ spots|length }})
+  </div>
+  <div class="card-body table-responsive">
+      <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+              <tr><th>Spot ID</th><th>Status</th><th>Lot</th><th>Pincode</th></tr>
+          </thead>
+          <tbody>
+            {% for s in spots %}
+            <tr class="{{ 'table-warning' if s.status=='O' else 'table-success' }}">
+              <td>{{ s.id }}</td>
+              <td>
+                  <span class="badge bg-{{'warning' if s.status=='O' else 'success'}}">
+                      {{ 'Occupied' if s.status=='O' else 'Available' }}
+                  </span>
+              </td>
+              <td>{{ s.lot.prime_location_name }}</td>
+              <td>{{ s.lot.pincode }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+      </table>
+  </div>
+</div>
+{% endif %}
+
+{% if reservations %}
+<div class="card mb-4">
+  <div class="card-header bg-warning">
+      <i class="fas fa-car"></i> Vehicle Matches ({{ reservations|length }})
+  </div>
+  <div class="card-body table-responsive">
+      <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+              <tr>
+                  <th>Vehicle</th><th>User</th><th>Spot</th>
+                  <th>Lot</th><th>Since</th>
+              </tr>
+          </thead>
+          <tbody>
+            {% for r in reservations %}
+            <tr>
+              <td>{{ r.vehicle_number }}</td>
+              <td>{{ r.user.name }} ({{ r.user.email }})</td>
+              <td>{{ r.spot_id }}</td>
+              <td>{{ r.spot.lot.prime_location_name }}</td>
+              <td>{{ r.parking_timestamp.strftime('%d-%b-%Y %I:%M %p') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+      </table>
+  </div>
+</div>
+{% endif %}
+
+<a href="{{ url_for('admin_dashboard') }}"
+   class="btn btn-outline-primary">
+   <i class="fas fa-arrow-left"></i> Back to Dashboard
+</a>
+{% endblock %}
