@@ -1,46 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Vehicle Parking App{% endblock %}
+{% block title %}Login - Parking Management{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-4">
-        <div class="card shadow">
+        <div class="card">
             <div class="card-header text-center bg-primary text-white">
                 <h4><i class="fas fa-sign-in-alt"></i> Login</h4>
             </div>
             <div class="card-body">
-                <form method="POST">
+                <form method="POST" action="{{ url_for('authentication_portal') }}">
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username/Email</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-                        <small class="form-text text-muted"></small>
+                        <label for="credential_id" class="form-label">Username/Email</label>
+                        <input type="text" class="form-control" id="credential_id" name="credential_id" required>
                     </div>
-                    
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <small class="form-text text-muted">'</small>
+                        <label for="access_code" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="access_code" name="access_code" required>
                     </div>
-                    
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-sign-in-alt"></i> Login
-                    </button>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </div>
                 </form>
-                
-                <hr>
-                <div class="text-center">
-                    <p class="mb-0">Don't have an account?</p>
-                    <a href="{{ url_for('register') }}" class="btn btn-outline-success">
-                        <i class="fas fa-user-plus"></i> Register as User
-                    </a>
-                </div>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">Don't have an account?</p>
+                <a href="{{ url_for('customer_registration') }}" class="btn btn-outline-success btn-sm">
+                    <i class="fas fa-user-plus"></i> Register
+                </a>
             </div>
         </div>
     </div>

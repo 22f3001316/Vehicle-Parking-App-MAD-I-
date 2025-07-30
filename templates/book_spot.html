@@ -1,46 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}Book Parking Spot{% endblock %}
+{% block title %}Book Parking Spot - Parking Management{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-header text-center bg-success text-white">
-                <h4><i class="fas fa-car"></i> Book Parking Spot</h4>
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="fas fa-parking"></i> Book Parking Spot</h4>
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Spot #{{ spot_id }}</strong> will be automatically assigned to you.
+                    <i class="fas fa-info-circle"></i> You are booking Spot #{{ spot_id }} at this facility.
                 </div>
                 
-                <form method="POST">
+                <form method="POST" action="{{ url_for('reserve_parking_spot', facility_id=lot_id) }}">
                     <div class="mb-3">
                         <label for="vehicle_number" class="form-label">Vehicle Number</label>
                         <input type="text" class="form-control" id="vehicle_number" name="vehicle_number" 
-                               placeholder="e.g., MH 01 AB 1234" required>
-                        <div class="form-text">Enter your vehicle registration number</div>
+                               placeholder="e.g., MH12AB1234" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="expected_end_time" class="form-label">Expected End Time (Optional)</label>
+                        <label for="expected_end_time" class="form-label">Expected Departure Time (Optional)</label>
                         <input type="datetime-local" class="form-control" id="expected_end_time" name="expected_end_time">
-                        <div class="form-text">When do you plan to leave? This helps with planning.</div>
+                        <div class="form-text">This helps us estimate your parking duration.</div>
                     </div>
                     
-                    <div class="alert alert-warning">
-                        <small><i class="fas fa-exclamation-triangle"></i> 
-                        Parking charges will be calculated based on actual time spent.</small>
-                    </div>
-                    
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
-                        </a>
+                    <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success">
                             <i class="fas fa-check"></i> Confirm Booking
                         </button>
+                        <a href="{{ url_for('customer_portal') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
                     </div>
                 </form>
             </div>
@@ -48,4 +41,3 @@
     </div>
 </div>
 {% endblock %}
-

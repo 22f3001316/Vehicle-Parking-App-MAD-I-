@@ -1,124 +1,171 @@
 {% extends "base.html" %}
-{% block title %}My Parking Summary{% endblock %}
+
+{% block title %}My Statistics - Parking Management{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="fas fa-chart-line"></i> My Parking Summary</h2>
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-chart-line"></i> My Parking Statistics</h2>
+        <p class="text-muted">Overview of your parking history and spending</p>
+    </div>
+</div>
 
 <div class="row mb-4">
     <div class="col-md-4">
-        <div class="card text-white bg-primary text-center">
-            <div class="card-body">
-                <h3>₹{{ total_spent }}</h3>
-                <p>Total Spent So Far</p>
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3>{{ reservations|length }}</h3>
+                <p class="mb-0">Total Bookings</p>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card text-white bg-success text-center">
-            <div class="card-body">
-                <h3>{{ reservations|length }}</h3>
-                <p>Total Visits</p>
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3>₹{{ total_spent }}</h3>
+                <p class="mb-0">Total Spent</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h3>{{ spending_chart_data|length }}</h3>
+                <p class="mb-0">Facilities Used</p>
             </div>
         </div>
     </div>
 </div>
 
-{% if spending_chart_data %}
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card">
-            <div class="card-header"><i class="fas fa-chart-pie"></i> Spend by Location</div>
+            <div class="card-header">
+                <h5><i class="fas fa-money-bill"></i> Spending by Facility</h5>
+            </div>
             <div class="card-body">
-                <canvas id="spendChart"></canvas>
+                {% if spending_chart_data %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Facility</th>
+                                <th>Amount Spent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in spending_chart_data %}
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td class="text-success">₹{{ item.amount }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No spending data available yet.
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
-
+    
     <div class="col-md-6 mb-4">
         <div class="card">
-            <div class="card-header"><i class="fas fa-chart-bar"></i> Visits by Location</div>
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> Visit Frequency</h5>
+            </div>
             <div class="card-body">
-                <canvas id="visitChart"></canvas>
+                {% if visit_chart_data %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Facility</th>
+                                <th>Visits</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in visit_chart_data %}
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td><span class="badge bg-primary">{{ item.count }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No visit data available yet.
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- detailed history -->
-<div class="card">
-  <div class="card-header"><i class="fas fa-history"></i> Parking History</div>
-  <div class="card-body table-responsive">
-    <table class="table table-sm">
-      <thead class="table-light">
-        <tr>
-          <th>#</th>
-          <th>Spot</th>
-          <th>Location</th>
-          <th>Vehicle</th>
-          <th>Start</th>
-          <th>End</th>
-          <th>Paid (₹)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in reservations %}
-        <tr>
-          <td>{{ loop.index }}</td>
-          <td>{{ r.spot_id }}</td>
-          <td>{{ r.spot.lot.prime_location_name }}</td>
-          <td>{{ r.vehicle_number }}</td>
-          <td>{{ r.parking_timestamp.strftime('%d-%b %I:%M%p') }}</td>
-          <td>
-            {% if r.leaving_timestamp %}
-              {{ r.leaving_timestamp.strftime('%d-%b %I:%M%p') }}
-            {% else %}
-              <span class="badge bg-warning">Active</span>
-            {% endif %}
-          </td>
-          <td>{{ r.parking_cost or 0 }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Complete Parking History</h5>
+            </div>
+            <div class="card-body">
+                {% if reservations %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Facility</th>
+                                <th>Vehicle</th>
+                                <th>Duration</th>
+                                <th>Cost</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reservation in reservations %}
+                            <tr>
+                                <td>{{ reservation.parking_timestamp.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ reservation.spot.lot.prime_location_name }}</td>
+                                <td>{{ reservation.vehicle_number }}</td>
+                                <td>
+                                    {% if reservation.leaving_timestamp %}
+                                        {{ ((reservation.leaving_timestamp - reservation.parking_timestamp).total_seconds() / 3600) | round(2) }} hours
+                                    {% else %}
+                                        <span class="text-warning">Ongoing</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if reservation.parking_cost %}
+                                        ₹{{ reservation.parking_cost }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if reservation.status == 'O' %}
+                                        <span class="badge bg-warning">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> No parking history available yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
-{% else %}
-<p class="alert alert-info">You haven’t completed any paid reservations yet.</p>
-{% endif %}
 {% endblock %}
-
-{% block scripts %}
-{% if spending_chart_data %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-/* ------- Spend by Location --------*/
-const spendCtx = document.getElementById('spendChart').getContext('2d');
-new Chart(spendCtx, {
-    type: 'pie',
-    data: {
-        labels: {{ spending_chart_data|map(attribute='name')|list|tojson }},
-        datasets: [{
-            data:  {{ spending_chart_data|map(attribute='amount')|list|tojson }},
-            backgroundColor: ['#007bff','#28a745','#ffc107','#17a2b8','#dc3545','#6f42c1']
-        }]
-    },
-    options: {responsive: true, plugins:{legend:{position:'bottom'}}}
-});
-
-/* ------- Visits by Location --------*/
-const visitCtx = document.getElementById('visitChart').getContext('2d');
-new Chart(visitCtx, {
-    type: 'bar',
-    data: {
-        labels: {{ visit_chart_data|map(attribute='name')|list|tojson }},
-        datasets:[{
-            data: {{ visit_chart_data|map(attribute='count')|list|tojson }},
-            backgroundColor: '#28a745'
-        }]
-    },
-    options:{responsive:true, scales:{y:{beginAtZero:true}}}
-});
-</script>
-{% endif %}
-{% endblock %}
-

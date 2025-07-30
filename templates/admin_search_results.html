@@ -1,100 +1,144 @@
 {% extends "base.html" %}
-{% block title %}Search – {{ query }}{% endblock %}
+
+{% block title %}Search Results - Parking Management{% endblock %}
 
 {% block content %}
-<h2 class="mb-3">
-    <i class="fas fa-search"></i> Search results for “{{ query }}”
-</h2>
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-search"></i> Search Results</h2>
+        <p class="text-muted">Results for: "{{ query }}"</p>
+    </div>
+</div>
 
-{% if not users and not spots and not reservations %}
-    <div class="alert alert-info">No matches found.</div>
-{% endif %}
-
+<!-- Users Section -->
 {% if users %}
-<div class="card mb-4">
-  <div class="card-header bg-success text-white">
-      <i class="fas fa-user"></i> Users ({{ users|length }})
-  </div>
-  <div class="card-body table-responsive">
-      <table class="table table-sm table-hover align-middle">
-          <thead class="table-light">
-              <tr><th>ID</th><th>Name</th><th>Email</th><th>Address</th></tr>
-          </thead>
-          <tbody>
-            {% for u in users %}
-            <tr>
-              <td>{{ u.id }}</td>
-              <td>{{ u.name }}</td>
-              <td>{{ u.email }}</td>
-              <td>{{ u.address }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-      </table>
-  </div>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users"></i> Customers ({{ users|length }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>PIN Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.address }}</td>
+                                <td>{{ user.pincode }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endif %}
 
-{% if spots %}
-<div class="card mb-4">
-  <div class="card-header bg-info text-white">
-      <i class="fas fa-parking"></i> Spots ({{ spots|length }})
-  </div>
-  <div class="card-body table-responsive">
-      <table class="table table-sm table-hover align-middle">
-          <thead class="table-light">
-              <tr><th>Spot ID</th><th>Status</th><th>Lot</th><th>Pincode</th></tr>
-          </thead>
-          <tbody>
-            {% for s in spots %}
-            <tr class="{{ 'table-warning' if s.status=='O' else 'table-success' }}">
-              <td>{{ s.id }}</td>
-              <td>
-                  <span class="badge bg-{{'warning' if s.status=='O' else 'success'}}">
-                      {{ 'Occupied' if s.status=='O' else 'Available' }}
-                  </span>
-              </td>
-              <td>{{ s.lot.prime_location_name }}</td>
-              <td>{{ s.lot.pincode }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-      </table>
-  </div>
-</div>
-{% endif %}
-
+<!-- Reservations Section -->
 {% if reservations %}
-<div class="card mb-4">
-  <div class="card-header bg-warning">
-      <i class="fas fa-car"></i> Vehicle Matches ({{ reservations|length }})
-  </div>
-  <div class="card-body table-responsive">
-      <table class="table table-sm table-hover align-middle">
-          <thead class="table-light">
-              <tr>
-                  <th>Vehicle</th><th>User</th><th>Spot</th>
-                  <th>Lot</th><th>Since</th>
-              </tr>
-          </thead>
-          <tbody>
-            {% for r in reservations %}
-            <tr>
-              <td>{{ r.vehicle_number }}</td>
-              <td>{{ r.user.name }} ({{ r.user.email }})</td>
-              <td>{{ r.spot_id }}</td>
-              <td>{{ r.spot.lot.prime_location_name }}</td>
-              <td>{{ r.parking_timestamp.strftime('%d-%b-%Y %I:%M %p') }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-      </table>
-  </div>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-car"></i> Reservations ({{ reservations|length }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Vehicle Number</th>
+                                <th>Customer</th>
+                                <th>Facility</th>
+                                <th>Parking Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reservation in reservations %}
+                            <tr>
+                                <td><strong>{{ reservation.vehicle_number }}</strong></td>
+                                <td>{{ reservation.user.name }}</td>
+                                <td>{{ reservation.spot.lot.prime_location_name }}</td>
+                                <td>{{ reservation.parking_timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    {% if reservation.status == 'O' %}
+                                        <span class="badge bg-danger">Occupied</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endif %}
 
-<a href="{{ url_for('admin_dashboard') }}"
-   class="btn btn-outline-primary">
-   <i class="fas fa-arrow-left"></i> Back to Dashboard
-</a>
+<!-- Spots Section -->
+{% if spots %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-square"></i> Parking Spots ({{ spots|length }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for spot in spots %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card {% if spot.status == 'O' %}border-danger{% else %}border-success{% endif %}">
+                            <div class="card-body">
+                                <h6>Spot #{{ spot.id }} - {{ spot.lot.prime_location_name }}</h6>
+                                <p class="small text-muted">{{ spot.lot.address }}</p>
+                                {% if spot.status == 'O' %}
+                                    <span class="badge bg-danger">OCCUPIED</span>
+                                {% else %}
+                                    <span class="badge bg-success">AVAILABLE</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if not users and not reservations and not spots %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="fas fa-search"></i> No results found for "{{ query }}". Try a different search term.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-12">
+        <a href="{{ url_for('admin_control_center') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
 {% endblock %}
