@@ -1,7 +1,7 @@
 # Vehicle-Parking-App-MAD-I-
 This project is a web dev **Vehicle Parking System**  ParkIt designed to manage and automate vehicle parking operations. It supports both **Admin** and **User** functionalities including parking lot creation, slot booking, and historical tracking.
 
-# 🚗 Vehicle Parking App - MAD-I Project
+#  Vehicle Parking App - MAD-I Project
 
 A multi-user parking management system built using **Flask**, **SQLite**, and **Bootstrap** for **Modern Application Development I**.
 
